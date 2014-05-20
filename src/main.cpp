@@ -11,6 +11,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -134,6 +135,10 @@ int main() {
     glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0); // position has 2 members of type float
     glEnableVertexAttribArray(posAttrib);
 
+    // Set color through uniform to be passed to fragment shader
+    GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
+    glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
+
 
 
     while(!glfwWindowShouldClose(window)){
@@ -141,6 +146,9 @@ int main() {
     	// Clear the screen to black
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		float time = glfwGetTime();
+		glUniform3f(uniColor, (sin(time * 4.0f) + 1.0f) / 2.0f, 0.0f, 0.0f);
 
     	glDrawArrays(GL_TRIANGLES, 0, 3);
 
