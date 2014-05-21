@@ -11,19 +11,20 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <cmath>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <string>
+#include <cmath>	// Needed for sin
+#include <fstream>	// Needed to read files
+#include <iostream>	// Needed to write to console
+#include <sstream>	// Needed for stringstream, to hold file contents as string buffer
+#include <string>	// C++ strings
 
 using namespace std;
 
 // Create something to render
+// Vertexes are X, Y, R, G, B
 float vertices[] = {
-	 0.0f,  0.5f, // Vertex 1 (X, Y)
-	 0.5f, -0.5f, // Vertex 2 (X, Y)
-	-0.5f, -0.5f  // Vertex 3 (X, Y)
+	 0.0f,  0.5f, 1.0f, 0.0f, 0.0f,
+	 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+	-0.5f, -0.5f, 0.0f, 0.0f, 1.0f
 };
 
 string vertexShaderFile;
@@ -132,8 +133,12 @@ int main() {
 
     // Once vertex array object is created, define how our vertex data is passed in
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 0, 0); // position has 2 members of type float
+    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), 0); // position has 2 members of type float
     glEnableVertexAttribArray(posAttrib);
+
+    GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(2*sizeof(float)));
+    glEnableVertexAttribArray(colAttrib);
 
     // Set color through uniform to be passed to fragment shader
     GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
