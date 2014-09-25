@@ -22,9 +22,25 @@ using namespace std;
 // Create something to render
 // Vertexes are X, Y, R, G, B
 float vertices[] = {
-	 0.0f,  0.5f, 1.0f, 0.0f, 0.0f,
-	 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-	-0.5f, -0.5f, 0.0f, 0.0f, 1.0f
+	 -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
+	  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 5.0f, 0.0f, // Top-right
+	  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 5.0f, 5.0f, // Bottom-right
+
+//	  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right Don't need to repeat
+	 -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 5.0f // Bottom-left
+//	 -0.5f,  0.5f, 1.0f, 0.0f, 0.0f  // Top-left Don't need to repeat
+};
+
+// Form a square from 2 triangles
+GLuint elements[] = {
+		0, 1, 2, // tl, tr, br
+		2, 3, 0  // br, bl, tl
+};
+
+// Checkerboard
+float pixels[] = {
+		0.0f, 0.0f, 0.0f,     1.0f, 1.0f, 1.0f,
+		1.0f, 1.0f, 1.0f,     0.0f, 0.0f, 0.0f
 };
 
 string vertexShaderFile;
@@ -105,6 +121,16 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    // Textures
+    GLuint tex;
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
     loadShader("shaders/vertex_shader.glsl", vertexShaderFile);
     loadShader("shaders/fragment_shader.glsl", fragmentShaderFile);
 
@@ -133,16 +159,26 @@ int main() {
 
     // Once vertex array object is created, define how our vertex data is passed in
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), 0); // position has 2 members of type float
+    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 7*sizeof(float), 0); // position has 2 members of type float
     glEnableVertexAttribArray(posAttrib);
 
     GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
-    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)(2*sizeof(float)));
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(2*sizeof(float)));
     glEnableVertexAttribArray(colAttrib);
 
+    GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
+    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(5*sizeof(float)));
+    glEnableVertexAttribArray(texAttrib);
+
     // Set color through uniform to be passed to fragment shader
-    GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
-    glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
+    //GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
+    //glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
+
+    // Make an element buffer to reuse vertices
+    GLuint ebo;
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
 
 
@@ -152,10 +188,10 @@ int main() {
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		float time = glfwGetTime();
-		glUniform3f(uniColor, (sin(time * 4.0f) + 1.0f) / 2.0f, 0.0f, 0.0f);
+		//float time = glfwGetTime();
+		//glUniform3f(uniColor, (sin(time * 4.0f) + 1.0f) / 2.0f, 0.0f, 0.0f);
 
-    	glDrawArrays(GL_TRIANGLES, 0, 3);
+    	glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
 
     	glfwSwapBuffers(window);
     	glfwPollEvents();
