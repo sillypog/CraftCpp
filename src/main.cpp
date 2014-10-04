@@ -22,13 +22,15 @@ using namespace std;
 
 // Create something to render
 // Vertexes are X, Y, R, G, B
+float repeatX = 3.0f;
+float repeatY = 3.0f;
 float vertices[] = {
 	 -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
-	  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 5.0f, 0.0f, // Top-right
-	  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 5.0f, 5.0f, // Bottom-right
+	  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, repeatX, 0.0f, // Top-right
+	  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, repeatX, repeatY, // Bottom-right
 
 //	  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right Don't need to repeat
-	 -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 5.0f // Bottom-left
+	 -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, repeatY // Bottom-left
 //	 -0.5f,  0.5f, 1.0f, 0.0f, 0.0f  // Top-left Don't need to repeat
 };
 
@@ -36,12 +38,6 @@ float vertices[] = {
 GLuint elements[] = {
 		0, 1, 2, // tl, tr, br
 		2, 3, 0  // br, bl, tl
-};
-
-// Checkerboard
-float pixels[] = {
-		0.0f, 0.0f, 0.0f,     1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f, 1.0f,     0.0f, 0.0f, 0.0f
 };
 
 string vertexShaderFile;
@@ -234,7 +230,7 @@ int main() {
     // Load texture image
     int width, height;
     bool hasAlpha;
-    char filename[] = "textures/circle.png";
+    char filename[] = "textures/grass-8.png";
     bool success = loadPngImage(filename, width, height, hasAlpha, &textureImage);
     printf("Outcome of loading %s: %s \n ", filename, success ? "success" : "fail");
     if (success){
@@ -257,9 +253,9 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, tex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, hasAlpha ? GL_RGBA : GL_RGB, width, height, 0, hasAlpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, textureImage);
 
     loadShader("shaders/vertex_shader.glsl", vertexShaderFile);
     loadShader("shaders/fragment_shader.glsl", fragmentShaderFile);
