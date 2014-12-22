@@ -21,16 +21,17 @@
 using namespace std;
 
 // Create something to render
-// Vertexes are X, Y, R, G, B
-float repeatX = 3.0f;
-float repeatY = 3.0f;
+// Vertexes are X, Y, R, G, B, texX, texY
+// Images are red upside down so the top of the shape has the bottom of the image
+float repeatX = 1.0f;
+float repeatY = 1.0f;
 float vertices[] = {
-	 -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, // Top-left
-	  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, repeatX, 0.0f, // Top-right
-	  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, repeatX, repeatY, // Bottom-right
+	 -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, repeatY, // Top-left
+	  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, repeatX, repeatY, // Top-right
+	  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, repeatX, 0.0f, // Bottom-right
 
 //	  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right Don't need to repeat
-	 -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, repeatY // Bottom-left
+	 -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f // Bottom-left
 //	 -0.5f,  0.5f, 1.0f, 0.0f, 0.0f  // Top-left Don't need to repeat
 };
 
@@ -43,7 +44,8 @@ GLuint elements[] = {
 string vertexShaderFile;
 string fragmentShaderFile;
 
-GLubyte *textureImage;
+GLubyte *kittenImage;
+GLubyte *puppyImage;
 
 void error_callback(int error, const char* description){
 	cout << "There was an error: " << error << ": " << description << endl;
@@ -228,14 +230,21 @@ int main() {
     printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
 
     // Load texture image
-    int width, height;
-    bool hasAlpha;
-    char filename[] = "textures/grass-8.png";
-    bool success = loadPngImage(filename, width, height, hasAlpha, &textureImage);
+    int widthKitten, heightKitten;
+    bool hasAlphaKitten;
+    char filename[] = "textures/sample.png";
+    bool success = loadPngImage(filename, widthKitten, heightKitten, hasAlphaKitten, &kittenImage);
     printf("Outcome of loading %s: %s \n ", filename, success ? "success" : "fail");
     if (success){
-    	cout << filename << ": " << width << "x" << height << ", hasAlpha: " << hasAlpha << endl;
+    	cout << filename << ": " << widthKitten << "x" << heightKitten << ", hasAlpha: " << hasAlphaKitten << endl;
     }
+
+    int widthPuppy, heightPuppy;
+    bool hasAlphaPuppy;
+    strcpy(filename, "textures/sample2.png");	// c way of reassigning char array, eg `filename = "..."`
+    success = loadPngImage(filename, widthPuppy, heightPuppy, hasAlphaPuppy, &puppyImage);
+    printf("Outcome of loading %s: %s \n ", filename, success ? "success" : "fail");
+
 
     // Prepare things for rendering
     GLuint vao;
@@ -248,14 +257,24 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Textures
-    GLuint tex;
-    glGenTextures(1, &tex);
-    glBindTexture(GL_TEXTURE_2D, tex);
+    GLuint textures[2];
+    glGenTextures(2, textures);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, hasAlpha ? GL_RGBA : GL_RGB, width, height, 0, hasAlpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, textureImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, hasAlphaKitten ? GL_RGBA : GL_RGB, widthKitten, heightKitten, 0, hasAlphaKitten ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, kittenImage);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, hasAlphaPuppy ? GL_RGBA : GL_RGB, widthPuppy, heightPuppy, 0, hasAlphaPuppy ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, puppyImage);
 
     loadShader("shaders/vertex_shader.glsl", vertexShaderFile);
     loadShader("shaders/fragment_shader.glsl", fragmentShaderFile);
@@ -299,6 +318,9 @@ int main() {
     // Set color through uniform to be passed to fragment shader
     //GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
     //glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texKitten"), 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "texPuppy"), 1);
+
 
     // Make an element buffer to reuse vertices
     GLuint ebo;
