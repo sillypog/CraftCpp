@@ -7,9 +7,10 @@ out vec4 outColor;
 
 uniform sampler2D texKitten;
 uniform sampler2D texPuppy;
+uniform float imageBlend;
 
 void main(){
 	vec4 colKitten = texture(texKitten, Texcoord);
 	vec4 colPuppy = texture(texPuppy, Texcoord);
-	outColor = mix(colKitten, colPuppy, 0.5);
+	outColor = mix(colKitten, colPuppy, imageBlend);
 }
