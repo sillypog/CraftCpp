@@ -14,10 +14,7 @@ void main(){
 	
 	if (outTex.y < 0.5){
 		outTex.y *= -1;
-		// Want to get 5 cycles in a distance of 0 - 0.5 (
-		//outTex.x += (sin(Texcoord.y * 60) / 20);
-		outTex.x += (sin(Texcoord.y * 60) / (sin(elapsed)+2) / 30 );
-		
+		outTex.x += sin((Texcoord.y * 60.0) + elapsed) * 1.5 / (sin(elapsed)+3) / 30 ;
 	}	
 
 	outColor = texture(texKitten, outTex);
