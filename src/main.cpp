@@ -320,8 +320,8 @@ int main() {
     //glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
     glUniform1i(glGetUniformLocation(shaderProgram, "texKitten"), 0);
     glUniform1i(glGetUniformLocation(shaderProgram, "texPuppy"), 1);
-    GLint imageBlend = glGetUniformLocation(shaderProgram, "imageBlend");
-    glUniform1f(imageBlend, 0.5f);
+    GLint elapsed = glGetUniformLocation(shaderProgram, "elapsed");
+    glUniform1f(elapsed, 0.5f);
 
 
     // Make an element buffer to reuse vertices
@@ -339,7 +339,8 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		float time = glfwGetTime();
-		glUniform1f(imageBlend, (sin(time * 4.0f) + 1.0f) / 2.0f);
+		//glUniform1f(imageBlend, (sin(time * 4.0f) + 1.0f) / 2.0f);
+		glUniform1f(elapsed, time);
 
     	glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
 
