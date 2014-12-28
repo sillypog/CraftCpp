@@ -336,7 +336,7 @@ int main() {
 
     // Create a transformation
     glm::mat4 trans;
-    trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));	// Rotate 180*0 around X, 180*0 around Y, 180*1 around Z (ie, 2D rotate 180 degrees)
+    trans = glm::rotate(trans, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));	// Rotate 180*0 around X, 180*0 around Y, 180*1 around Z (ie, 2D rotate 180 degrees)
     // Test the transformation
     glm::vec4 result = trans * glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
     //cout << "Transform result: " << result.x << "," << result.y << "," << result.z;
@@ -355,6 +355,9 @@ int main() {
 		float time = glfwGetTime();
 		//glUniform1f(imageBlend, (sin(time * 4.0f) + 1.0f) / 2.0f);
 		glUniform1f(elapsed, time);
+		glUniformMatrix4fv(uniTrans, 1, GL_FALSE, glm::value_ptr(
+				glm::rotate(trans, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f))
+		));
 
     	glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
 
