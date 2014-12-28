@@ -335,15 +335,29 @@ int main() {
 
 
     // Create a transformation
-    glm::mat4 trans;
-    trans = glm::rotate(trans, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));	// Rotate 180*0 around X, 180*0 around Y, 180*1 around Z (ie, 2D rotate 180 degrees)
+    glm::mat4 model;
+    model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));	// Rotate 180*0 around X, 180*0 around Y, 180*1 around Z (ie, 2D rotate 180 degrees)
     // Test the transformation
-    glm::vec4 result = trans * glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec4 result = model * glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
     //cout << "Transform result: " << result.x << "," << result.y << "," << result.z;
     printf("%f, %f, %f\n", result.x, result.y, result.z);	// This rounds the numbers better (0 isn't exactly 0)
     // Apply the transformation
-    GLint uniTrans = glGetUniformLocation(shaderProgram, "trans");
-    glUniformMatrix4fv(uniTrans, 1, GL_FALSE, glm::value_ptr(trans));
+    GLint uniModel = glGetUniformLocation(shaderProgram, "model");
+    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+
+    // Create a view, which is the camera
+    glm::mat4 view = glm::lookAt(
+    		glm::vec3(1.2f, 1.2f, 1.2f), // Camera position
+    		glm::vec3(0.0f, 0.0f, 0.0f), // Point to focus on
+    		glm::vec3(0.0f, 0.0f, 1.0f) // Define the "up" axis
+    );
+    GLint uniView = glGetUniformLocation(shaderProgram, "view");
+    glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
+
+    // Create a perspective projection
+    glm::mat4 proj = glm::perspective(45.0f, 640.0f / 480.0f, 1.0f, 10.0f);
+    GLint uniProj = glGetUniformLocation(shaderProgram, "proj");
+    glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
 
     while(!glfwWindowShouldClose(window)){
@@ -355,9 +369,12 @@ int main() {
 		float time = glfwGetTime();
 		//glUniform1f(imageBlend, (sin(time * 4.0f) + 1.0f) / 2.0f);
 		glUniform1f(elapsed, time);
-		glUniformMatrix4fv(uniTrans, 1, GL_FALSE, glm::value_ptr(
-				glm::rotate(trans, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f))
+		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(
+				glm::rotate(model, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f))
 		));
+		/*glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(
+				glm::translate(view, glm::vec3(sin(time), 0.0f, 0.0f))
+		));*/
 
     	glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
 
