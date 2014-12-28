@@ -11,7 +11,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <png.h>
-#include <glm/glm.hpp>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -333,6 +333,17 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
+
+    // Create a transformation
+    glm::mat4 trans;
+    trans = glm::rotate(trans, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));	// Rotate 180*0 around X, 180*0 around Y, 180*1 around Z (ie, 2D rotate 180 degrees)
+    // Test the transformation
+    glm::vec4 result = trans * glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    //cout << "Transform result: " << result.x << "," << result.y << "," << result.z;
+    printf("%f, %f, %f\n", result.x, result.y, result.z);	// This rounds the numbers better (0 isn't exactly 0)
+    // Apply the transformation
+    GLint uniTrans = glGetUniformLocation(shaderProgram, "trans");
+    glUniformMatrix4fv(uniTrans, 1, GL_FALSE, glm::value_ptr(trans));
 
 
     while(!glfwWindowShouldClose(window)){
