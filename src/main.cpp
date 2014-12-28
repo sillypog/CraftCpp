@@ -347,7 +347,7 @@ int main() {
 
     // Create a view, which is the camera
     glm::mat4 view = glm::lookAt(
-    		glm::vec3(1.2f, 1.2f, 1.2f), // Camera position
+    		glm::vec3(0.0f, 0.1f, 2.0f), // Camera position
     		glm::vec3(0.0f, 0.0f, 0.0f), // Point to focus on
     		glm::vec3(0.0f, 0.0f, 1.0f) // Define the "up" axis
     );
@@ -370,11 +370,11 @@ int main() {
 		//glUniform1f(imageBlend, (sin(time * 4.0f) + 1.0f) / 2.0f);
 		glUniform1f(elapsed, time);
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(
-				glm::rotate(model, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f))
+				glm::rotate(model, sin(time), glm::vec3(0.0f, 0.0f, 1.0f))
 		));
-		/*glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(
+		glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(
 				glm::translate(view, glm::vec3(sin(time), 0.0f, 0.0f))
-		));*/
+		));
 
     	glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
 
