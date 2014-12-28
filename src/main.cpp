@@ -50,6 +50,8 @@ string fragmentShaderFile;
 GLubyte *kittenImage;
 GLubyte *puppyImage;
 
+int frames = 0;
+
 void error_callback(int error, const char* description){
 	cout << "There was an error: " << error << ": " << description << endl;
 }
@@ -359,6 +361,7 @@ int main() {
     GLint uniProj = glGetUniformLocation(shaderProgram, "proj");
     glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
+    float startTime = glfwGetTime();
 
     while(!glfwWindowShouldClose(window)){
     	// Keep running
@@ -380,7 +383,16 @@ int main() {
 
     	glfwSwapBuffers(window);
     	glfwPollEvents();
+
+    	frames++;
     }
+
+    // Calculate average frames per second
+    float endTime = glfwGetTime();
+    float fps = frames/(endTime - startTime);
+    float mspf = ((endTime - startTime) * 1000) / frames;
+    cout << "FPS: " << fps << " over " << (endTime-startTime) << " seconds." << endl;
+    cout << "MSPF: " << mspf << " over " << frames << " frames." << endl;
 
     // Cleanup
     glDeleteProgram(shaderProgram);
