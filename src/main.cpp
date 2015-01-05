@@ -25,7 +25,7 @@ using namespace std;
 
 // Create something to render
 // Vertexes are X, Y, R, G, B, texX, texY
-// Images are red upside down so the top of the shape has the bottom of the image
+// Images are read upside down so the top of the shape has the bottom of the image
 float repeatX = 1.0f;
 float repeatY = 1.0f;
 float vertices[] = {
@@ -223,6 +223,8 @@ int main() {
     }
 
     glfwMakeContextCurrent(window);
+
+    glfwSwapInterval(0);
 
     // Setup GLEW to handle modern OpenGL functions
     glewExperimental = GL_TRUE;
