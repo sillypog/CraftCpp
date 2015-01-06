@@ -373,8 +373,11 @@ int main() {
 
 		float time = glfwGetTime();
 		glUniform1f(elapsed, time);
+		float clampedSin = (sin(time)+1.0f) / 2.0f;
+		GLfloat scale = 0.1f + 0.9f * clampedSin;
+		cout << time << " " << sin(time) << " " << clampedSin << " "<< scale << endl;
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(
-				glm::rotate(model, time, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(model, glm::vec3(sin(time), sin(time), 1.0f))
+				glm::rotate(model, time, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(model, glm::vec3(scale, scale, 1.0f))
 		));
 
     	glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
