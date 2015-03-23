@@ -52,6 +52,11 @@ GLubyte *puppyImage;
 
 int frames = 0;
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+        cout << "Pressed space" << endl;
+}
+
 void error_callback(int error, const char* description){
 	cout << "There was an error: " << error << ": " << description << endl;
 }
@@ -226,6 +231,8 @@ int main() {
 
     glfwSwapInterval(0);
 
+    glfwSetKeyCallback(window, key_callback);
+
     // Setup GLEW to handle modern OpenGL functions
     glewExperimental = GL_TRUE;
     glewInit();
@@ -375,7 +382,7 @@ int main() {
 		glUniform1f(elapsed, time);
 		float clampedSin = (sin(time)+1.0f) / 2.0f;
 		GLfloat scale = 0.1f + 0.9f * clampedSin;
-		cout << time << " " << sin(time) << " " << clampedSin << " "<< scale << endl;
+//		cout << time << " " << sin(time) << " " << clampedSin << " "<< scale << endl;
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(
 				glm::rotate(model, time, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(model, glm::vec3(scale, scale, 1.0f))
 		));
