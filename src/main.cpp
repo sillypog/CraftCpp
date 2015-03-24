@@ -383,6 +383,7 @@ int main() {
     float startTime = glfwGetTime();
 
 	const float maxRotation = glm::radians(360.0f);
+	const float tweenLength = 2.0f;
 	cout << "Max rotation: " << maxRotation << endl;
 
     while(!glfwWindowShouldClose(window)){
@@ -398,13 +399,14 @@ int main() {
 		if (rotationStartTime > 0){
 			// Decide how much to rotate
 			float rotation = time - rotationStartTime;	// Want to apply easing to this so it slows towards end of spin
+			float tween = easeOutQuad(rotation, 0.0f, maxRotation, tweenLength);
+
 			// Don't let us go past 360 degrees (2 pi radians)
-			if (rotation >= maxRotation){
+			if (tween >= maxRotation || rotation >= tweenLength){
 				rotationStartTime = numeric_limits<float>::lowest();
 				rotation = 0.0f;
 				cout << "Stopping rotation" << endl;
 			}
-			float tween = easeOutQuad(rotation, 0.0f, maxRotation, maxRotation);
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(
 				glm::rotate(model, tween, glm::vec3(1.0f, 0.0f, 0.0f))
 			));
