@@ -56,7 +56,7 @@ int frames = 0;
 float rotationStartTime = numeric_limits<float>::lowest();
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
-    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS && rotationStartTime < 0){
         cout << "Pressed space" << endl;
         rotationStartTime = glfwGetTime();
     }
@@ -210,6 +210,16 @@ bool loadPngImage(char *name, int &outWidth, int &outHeight, bool &outHasAlpha, 
 
     /* That's it */
     return true;
+}
+
+/**
+ * t = current
+ * b = beginning
+ * c = change
+ * d = total
+ */
+float easeOutQuad(float t, float b, float c, float d) {
+	return -c *(t/=d)*(t-2) + b;
 }
 
 int main() {
@@ -392,9 +402,11 @@ int main() {
 			if (rotation >= maxRotation){
 				rotationStartTime = numeric_limits<float>::lowest();
 				rotation = 0.0f;
+				cout << "Stopping rotation" << endl;
 			}
+			float tween = easeOutQuad(rotation, 0.0f, maxRotation, maxRotation);
 			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(
-				glm::rotate(model, rotation, glm::vec3(1.0f, 0.0f, 0.0f))
+				glm::rotate(model, tween, glm::vec3(1.0f, 0.0f, 0.0f))
 			));
 		}
 
