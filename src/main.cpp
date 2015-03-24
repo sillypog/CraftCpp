@@ -12,6 +12,7 @@
 #include <GLFW/glfw3.h>
 #include <png.h>
 
+#include <glm/gtc/constants.hpp> // Wanted to use this for two_pi but no luck
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -52,9 +53,13 @@ GLubyte *puppyImage;
 
 int frames = 0;
 
+float rotationStartTime = numeric_limits<float>::lowest();
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
-    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS){
         cout << "Pressed space" << endl;
+        rotationStartTime = glfwGetTime();
+    }
 }
 
 void error_callback(int error, const char* description){
@@ -347,11 +352,6 @@ int main() {
 
     // Create a transformation
     glm::mat4 model;
-    model = glm::rotate(model, glm::radians(0.0f), glm::vec3(0.0f, 0.0f, 1.0f));	// Rotate 180*0 around X, 180*0 around Y, 180*1 around Z (ie, 2D rotate 180 degrees)
-    // Test the transformation
-    glm::vec4 result = model * glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    //cout << "Transform result: " << result.x << "," << result.y << "," << result.z;
-    printf("%f, %f, %f\n", result.x, result.y, result.z);	// This rounds the numbers better (0 isn't exactly 0)
     // Apply the transformation
     GLint uniModel = glGetUniformLocation(shaderProgram, "model");
     glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
@@ -366,11 +366,14 @@ int main() {
     glUniformMatrix4fv(uniView, 1, GL_FALSE, glm::value_ptr(view));
 
     // Create a perspective projection
-    glm::mat4 proj = glm::perspective(45.0f, 640.0f / 480.0f, 1.0f, 10.0f);
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), 640.0f / 480.0f, 1.0f, 10.0f);
     GLint uniProj = glGetUniformLocation(shaderProgram, "proj");
     glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
     float startTime = glfwGetTime();
+
+	const float maxRotation = glm::radians(360.0f);
+	cout << "Max rotation: " << maxRotation << endl;
 
     while(!glfwWindowShouldClose(window)){
     	// Keep running
@@ -380,12 +383,20 @@ int main() {
 
 		float time = glfwGetTime();
 		glUniform1f(elapsed, time);
-		float clampedSin = (sin(time)+1.0f) / 2.0f;
-		GLfloat scale = 0.1f + 0.9f * clampedSin;
-//		cout << time << " " << sin(time) << " " << clampedSin << " "<< scale << endl;
-		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(
-				glm::rotate(model, time, glm::vec3(0.0f, 0.0f, 1.0f)) * glm::scale(model, glm::vec3(scale, scale, 1.0f))
-		));
+
+		// Allow it to spin on space press
+		if (rotationStartTime > 0){
+			// Decide how much to rotate
+			float rotation = time - rotationStartTime;	// Want to apply easing to this so it slows towards end of spin
+			// Don't let us go past 360 degrees (2 pi radians)
+			if (rotation >= maxRotation){
+				rotationStartTime = numeric_limits<float>::lowest();
+				rotation = 0.0f;
+			}
+			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(
+				glm::rotate(model, rotation, glm::vec3(1.0f, 0.0f, 0.0f))
+			));
+		}
 
     	glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
 
