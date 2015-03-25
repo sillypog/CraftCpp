@@ -12,7 +12,7 @@
 #include <GLFW/glfw3.h>
 #include <png.h>
 
-#include <glm/gtc/constants.hpp> // Wanted to use this for two_pi but no luck
+#include <glm/gtc/constants.hpp> // Wanted to use this for two_pi
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -382,9 +382,8 @@ int main() {
 
     float startTime = glfwGetTime();
 
-	const float maxRotation = glm::radians(360.0f);
+	const float maxRotation = glm::two_pi<float>();
 	const float tweenLength = 2.0f;
-	cout << "Max rotation: " << maxRotation << endl;
 
     while(!glfwWindowShouldClose(window)){
     	// Keep running
