@@ -19,6 +19,7 @@
 #include <cmath>	// Needed for sin
 #include <fstream>	// Needed to read files
 #include <iostream>	// Needed to write to console
+#include <limits>	// Needed to get lowest float value
 #include <sstream>	// Needed for stringstream, to hold file contents as string buffer
 #include <string>	// C++ strings
 
@@ -439,7 +440,7 @@ int main() {
     glfwDestroyWindow(window);
 
     glfwTerminate();
-    return EXIT_SUCCESS;
+    return 0;
 }
 
 
