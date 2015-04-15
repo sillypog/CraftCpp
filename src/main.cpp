@@ -26,17 +26,17 @@
 using namespace std;
 
 // Create something to render
-// Vertexes are X, Y, R, G, B, texX, texY
+// Vertexes are X, Y, Z, R, G, B, texX, texY
 // Images are read upside down so the top of the shape has the bottom of the image
 float repeatX = 1.0f;
 float repeatY = 1.0f;
 float vertices[] = {
-	 -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 0.0f, repeatY, // Top-left
-	  0.5f,  0.5f, 0.0f, 1.0f, 0.0f, repeatX, repeatY, // Top-right
-	  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, repeatX, 0.0f, // Bottom-right
+	 -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, repeatY, // Top-left
+	  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, repeatX, repeatY, // Top-right
+	  0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, repeatX, 0.0f, // Bottom-right
 
 //	  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right Don't need to repeat
-	 -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f // Bottom-left
+	 -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f // Bottom-left
 //	 -0.5f,  0.5f, 1.0f, 0.0f, 0.0f  // Top-left Don't need to repeat
 };
 
@@ -53,15 +53,6 @@ GLubyte *kittenImage;
 GLubyte *puppyImage;
 
 int frames = 0;
-
-float rotationStartTime = numeric_limits<float>::lowest();
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
-    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS && rotationStartTime < 0){
-        cout << "Pressed space" << endl;
-        rotationStartTime = glfwGetTime();
-    }
-}
 
 void error_callback(int error, const char* description){
 	cout << "There was an error: " << error << ": " << description << endl;
@@ -213,16 +204,6 @@ bool loadPngImage(char *name, int &outWidth, int &outHeight, bool &outHasAlpha, 
     return true;
 }
 
-/**
- * t = current
- * b = beginning
- * c = change
- * d = total
- */
-float easeOutQuad(float t, float b, float c, float d) {
-	return -c *(t/=d)*(t-2) + b;
-}
-
 int main() {
 	cout << "Hello World from C++!" << endl;
 
@@ -246,8 +227,6 @@ int main() {
     glfwMakeContextCurrent(window);
 
     glfwSwapInterval(0);
-
-    glfwSetKeyCallback(window, key_callback);
 
     // Setup GLEW to handle modern OpenGL functions
     glewExperimental = GL_TRUE;
@@ -334,15 +313,15 @@ int main() {
 
     // Once vertex array object is created, define how our vertex data is passed in
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 7*sizeof(float), 0); // position has 2 members of type float
+    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), 0); // position has 2 members of type float
     glEnableVertexAttribArray(posAttrib);
 
     GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
-    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(2*sizeof(float)));
+    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3*sizeof(float)));
     glEnableVertexAttribArray(colAttrib);
 
     GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
-    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 7*sizeof(float), (void*)(5*sizeof(float)));
+    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(6*sizeof(float)));
     glEnableVertexAttribArray(texAttrib);
 
     // Set color through uniform to be passed to fragment shader
@@ -381,10 +360,9 @@ int main() {
     GLint uniProj = glGetUniformLocation(shaderProgram, "proj");
     glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
-    float startTime = glfwGetTime();
+    glm::mat4 trans;
 
-	const float maxRotation = glm::two_pi<float>();
-	const float tweenLength = 2.0f;
+    float startTime = glfwGetTime();
 
     while(!glfwWindowShouldClose(window)){
     	// Keep running
@@ -395,22 +373,9 @@ int main() {
 		float time = glfwGetTime();
 		glUniform1f(elapsed, time);
 
-		// Allow it to spin on space press
-		if (rotationStartTime > 0){
-			// Decide how much to rotate
-			float rotation = time - rotationStartTime;	// Want to apply easing to this so it slows towards end of spin
-			float tween = easeOutQuad(rotation, 0.0f, maxRotation, tweenLength);
-
-			// Don't let us go past 360 degrees (2 pi radians)
-			if (tween >= maxRotation || rotation >= tweenLength){
-				rotationStartTime = numeric_limits<float>::lowest();
-				rotation = 0.0f;
-				cout << "Stopping rotation" << endl;
-			}
-			glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(
-				glm::rotate(model, tween, glm::vec3(1.0f, 0.0f, 0.0f))
-			));
-		}
+		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(
+				glm::rotate(trans, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f))
+		));
 
     	glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
 

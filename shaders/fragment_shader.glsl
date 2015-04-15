@@ -11,11 +11,6 @@ uniform float elapsed;
 
 void main(){
 	vec2 outTex = Texcoord;
-	
-	if (outTex.y < 0.5){
-		outTex.y *= -1;
-		outTex.x += sin((Texcoord.y * 60.0) + elapsed) * 1.5 / (sin(elapsed)+3) / 30 ;
-	}	
 
-	outColor = texture(texKitten, outTex);
+	outColor = texture(texKitten, outTex) * vec4(Color,1.0);
 }
