@@ -361,13 +361,16 @@ int main() {
 
     glm::mat4 trans;
 
+    glEnable(GL_DEPTH_TEST);
+
     float startTime = glfwGetTime();
 
     while(!glfwWindowShouldClose(window)){
     	// Keep running
     	// Clear the screen to black
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClearDepth(1.0f); // This is the default anyway
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		float time = glfwGetTime();
 		glUniform1f(elapsed, time);
