@@ -31,26 +31,53 @@ using namespace std;
 float repeatX = 1.0f;
 float repeatY = 1.0f;
 float vertices[] = {
-	 -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, repeatY, // Top-left
-	  0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, repeatX, repeatY, // Top-right
-	  0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, repeatX, 0.0f, // Bottom-right
+	-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+	 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
 
-//	  0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // Bottom-right Don't need to repeat
-	 -0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f // Bottom-left
-//	 -0.5f,  0.5f, 1.0f, 0.0f, 0.0f  // Top-left Don't need to repeat
-};
+	-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
 
-// Form a square from 2 triangles
-GLuint elements[] = {
-		0, 1, 2, // tl, tr, br
-		2, 3, 0  // br, bl, tl
+	-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+	-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+	-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+
+	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	 0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+
+	-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+	 0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	 0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	 0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	-0.5f, -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+	-0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+
+	-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+	 0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+	-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+	-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f
 };
 
 string vertexShaderFile;
 string fragmentShaderFile;
 
 GLubyte *kittenImage;
-GLubyte *puppyImage;
 
 int frames = 0;
 
@@ -231,10 +258,6 @@ int main() {
     // Setup GLEW to handle modern OpenGL functions
     glewExperimental = GL_TRUE;
     glewInit();
-    // Test GLEW
-    /*GLuint vertexBuffer;
-    glGenBuffers(1, &vertexBuffer);
-    printf("%u\n", vertexBuffer);*/
 
     printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
 
@@ -248,13 +271,6 @@ int main() {
     	cout << filename << ": " << widthKitten << "x" << heightKitten << ", hasAlpha: " << hasAlphaKitten << endl;
     }
 
-    int widthPuppy, heightPuppy;
-    bool hasAlphaPuppy;
-    strcpy(filename, "textures/sample2.png");	// c way of reassigning char array, eg `filename = "..."`
-    success = loadPngImage(filename, widthPuppy, heightPuppy, hasAlphaPuppy, &puppyImage);
-    printf("Outcome of loading %s: %s \n ", filename, success ? "success" : "fail");
-
-
     // Prepare things for rendering
     GLuint vao;
 	glGenVertexArrays(1, &vao);
@@ -266,8 +282,8 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Textures
-    GLuint textures[2];
-    glGenTextures(2, textures);
+    GLuint textures[1];
+    glGenTextures(1, textures);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textures[0]);
@@ -276,14 +292,6 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, hasAlphaKitten ? GL_RGBA : GL_RGB, widthKitten, heightKitten, 0, hasAlphaKitten ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, kittenImage);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, textures[1]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, hasAlphaPuppy ? GL_RGBA : GL_RGB, widthPuppy, heightPuppy, 0, hasAlphaPuppy ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, puppyImage);
 
     loadShader("shaders/vertex_shader.glsl", vertexShaderFile);
     loadShader("shaders/fragment_shader.glsl", fragmentShaderFile);
@@ -313,7 +321,7 @@ int main() {
 
     // Once vertex array object is created, define how our vertex data is passed in
     GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-    glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), 0); // position has 2 members of type float
+    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), 0); // position has 2 members of type float
     glEnableVertexAttribArray(posAttrib);
 
     GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
@@ -328,17 +336,8 @@ int main() {
     //GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
     //glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
     glUniform1i(glGetUniformLocation(shaderProgram, "texKitten"), 0);
-    glUniform1i(glGetUniformLocation(shaderProgram, "texPuppy"), 1);
     GLint elapsed = glGetUniformLocation(shaderProgram, "elapsed");
     glUniform1f(elapsed, 0.0f);
-
-
-    // Make an element buffer to reuse vertices
-    GLuint ebo;
-    glGenBuffers(1, &ebo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
-
 
     // Create a transformation
     glm::mat4 model;
@@ -377,7 +376,7 @@ int main() {
 				glm::rotate(trans, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f))
 		));
 
-    	glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
     	glfwSwapBuffers(window);
     	glfwPollEvents();
