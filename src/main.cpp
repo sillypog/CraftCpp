@@ -348,10 +348,7 @@ int main() {
     glUniform1f(elapsed, 0.0f);
 
     // Create a transformation
-    glm::mat4 model;
-    // Apply the transformation
     GLint uniModel = glGetUniformLocation(shaderProgram, "model");
-    glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
     // Create a view, which is the camera
     glm::mat4 view = glm::lookAt(
@@ -367,8 +364,6 @@ int main() {
     GLint uniProj = glGetUniformLocation(shaderProgram, "proj");
     glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
-    glm::mat4 trans;
-
     glEnable(GL_DEPTH_TEST);
 
     float startTime = glfwGetTime();
@@ -383,12 +378,21 @@ int main() {
 		float time = glfwGetTime();
 		glUniform1f(elapsed, time);
 
-		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(
-				glm::rotate(trans, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f))
-		));
+        // Reset the model matrix each frame
+        glm::mat4 model;
+        model = glm::rotate(model, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+
+		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 		glDrawArrays(GL_TRIANGLES, 0, 36); // Cube
 		glDrawArrays(GL_TRIANGLES, 36, 6); // Floor
+		// Cube reflection
+		model = glm::scale(
+            glm::translate(model, glm::vec3(0, 0, -1)),
+            glm::vec3(1, 1, -1)
+        );
+        glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
     	glfwSwapBuffers(window);
     	glfwPollEvents();
