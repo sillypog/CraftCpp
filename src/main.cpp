@@ -71,7 +71,15 @@ float vertices[] = {
 	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
 	 0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
 	-0.5f,  0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-	-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f
+	-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+
+	// Floor
+	-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+	 1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+	 1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+	 1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+	-1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+	-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
 };
 
 string vertexShaderFile;
@@ -347,7 +355,7 @@ int main() {
 
     // Create a view, which is the camera
     glm::mat4 view = glm::lookAt(
-    		glm::vec3(1.2f, 1.2f, 1.2f), // Camera position
+    		glm::vec3(2.0f, 2.0f, 1.2f), // Camera position
     		glm::vec3(0.0f, 0.0f, 0.0f), // Point to focus on
     		glm::vec3(0.0f, 0.0f, 1.0f) // Define the "up" axis
     );
@@ -367,8 +375,8 @@ int main() {
 
     while(!glfwWindowShouldClose(window)){
     	// Keep running
-    	// Clear the screen to black
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    	// Clear the screen to white
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 		glClearDepth(1.0f); // This is the default anyway
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -379,7 +387,8 @@ int main() {
 				glm::rotate(trans, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f))
 		));
 
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, 36); // Cube
+		glDrawArrays(GL_TRIANGLES, 36, 6); // Floor
 
     	glfwSwapBuffers(window);
     	glfwPollEvents();
