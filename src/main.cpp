@@ -380,19 +380,34 @@ int main() {
 
         // Reset the model matrix each frame
         glm::mat4 model;
-        model = glm::rotate(model, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 
+        // Apply rotation
+        model = glm::rotate(model, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
-		glDrawArrays(GL_TRIANGLES, 0, 36); // Cube
-		glDrawArrays(GL_TRIANGLES, 36, 6); // Floor
+        // Cube
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // Floor
+        glEnable(GL_STENCIL_TEST);  // Discard any reflection that is outside floor
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);  // Set any stencil to 1
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        glStencilMask(0xFF);    // Write to stencil buffer
+        glDepthMask(GL_FALSE);
+        glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer - can I move this to the main call?
+		glDrawArrays(GL_TRIANGLES, 36, 6); // <- Draw the floor
+
 		// Cube reflection
 		model = glm::scale(
             glm::translate(model, glm::vec3(0, 0, -1)),
             glm::vec3(1, 1, -1)
         );
         glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
+        glStencilFunc(GL_EQUAL, 1, 0xFF);   // Pass test if stencil is 1 (set by floor)
+        glStencilMask(0x00);    // Don't write to stencil buffer
+        glDepthMask(GL_TRUE);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDisable(GL_STENCIL_TEST); // Turn off before next cube draw
 
     	glfwSwapBuffers(window);
     	glfwPollEvents();
