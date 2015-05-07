@@ -7,13 +7,14 @@ in vec2 texcoord;
 out vec3 Color;
 out vec2 Texcoord;
 
+uniform vec3 overrideColor;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
 void main()
 {
-	Color = color;
+	Color = overrideColor * color;
 	Texcoord = texcoord;
     gl_Position = proj * view * model * vec4(position, 1.0);	// Would be better to pass in premultiplied matrix to avoid repeating this for each vertex
 }

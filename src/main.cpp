@@ -364,6 +364,8 @@ int main() {
     GLint uniProj = glGetUniformLocation(shaderProgram, "proj");
     glUniformMatrix4fv(uniProj, 1, GL_FALSE, glm::value_ptr(proj));
 
+    GLint uniColor = glGetUniformLocation(shaderProgram, "overrideColor");
+
     glEnable(GL_DEPTH_TEST);
 
     float startTime = glfwGetTime();
@@ -371,7 +373,7 @@ int main() {
     while(!glfwWindowShouldClose(window)){
     	// Keep running
     	// Clear the screen to white
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClearDepth(1.0f); // This is the default anyway
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -394,7 +396,7 @@ int main() {
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glStencilMask(0xFF);    // Write to stencil buffer
         glDepthMask(GL_FALSE);
-        glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer - can I move this to the main call?
+        glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer - can't do this until GL_STENCIL_TEST enabled
 		glDrawArrays(GL_TRIANGLES, 36, 6); // <- Draw the floor
 
 		// Cube reflection
@@ -406,7 +408,11 @@ int main() {
         glStencilFunc(GL_EQUAL, 1, 0xFF);   // Pass test if stencil is 1 (set by floor)
         glStencilMask(0x00);    // Don't write to stencil buffer
         glDepthMask(GL_TRUE);
+        glUniform3f(uniColor, 0.3f, 0.3f, 0.3f); // Darken the reflection
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // Reset for next draw
+        glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
         glDisable(GL_STENCIL_TEST); // Turn off before next cube draw
 
     	glfwSwapBuffers(window);
