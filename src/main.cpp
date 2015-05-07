@@ -89,7 +89,6 @@ GLuint elements[] = {
     11, 2, 12, 12, 13, 11,
     10, 14, 5,  5,  4, 10,
     3,  2, 11, 11, 15,  3
-
 };
 
 string vertexShaderFile;
@@ -450,6 +449,7 @@ int main() {
 	glDeleteShader(vertexShader);
 
 	glDeleteBuffers(1, &vbo);
+    glDeleteBuffers(1, &ebo);
 
 	glDeleteVertexArrays(1, &vao);
 
