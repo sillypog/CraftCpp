@@ -74,12 +74,12 @@ float vertices[] = {
 //	-0.5f,  0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, // 3
 
 	// Floor
-	-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-	 1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-	 1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-	 1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-	-1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-	-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f
+	-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, // 16
+	 1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, // 17
+	 1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, // 18
+//	 1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, // 18
+	-1.0f,  1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, // 19
+//	-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f  // 16
 };
 
 GLuint elements[] = {
@@ -88,7 +88,10 @@ GLuint elements[] = {
     8,  9, 10, 10,  4,  8,
     11, 2, 12, 12, 13, 11,
     10, 14, 5,  5,  4, 10,
-    3,  2, 11, 11, 15,  3
+    3,  2, 11, 11, 15,  3,
+
+    // Floor
+    16, 17, 18, 18, 19, 16
 };
 
 string vertexShaderFile;
@@ -251,6 +254,9 @@ bool loadPngImage(char *name, int &outWidth, int &outHeight, bool &outHasAlpha, 
 int main() {
 	cout << "Hello World from C++!" << endl;
 
+    cout << "Sizeof GLuint is " << sizeof(GLuint) << endl;
+    cout << "Sizeof elements is " << sizeof(elements) << endl;
+
 	glfwSetErrorCallback(error_callback);
 
 	if (!glfwInit()){
@@ -385,6 +391,9 @@ int main() {
 
     float startTime = glfwGetTime();
 
+    constexpr int VERTICES_IN_FACE = 6;
+    constexpr int VERTICES_IN_CUBE = VERTICES_IN_FACE * 6;
+
     while(!glfwWindowShouldClose(window)){
     	// Keep running
     	// Clear the screen to white
@@ -402,8 +411,8 @@ int main() {
         model = glm::rotate(model, time * 1.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 		glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
-        // Cube
-        glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
+        // Cube - don't bother drawing the face that's on the floor
+        glDrawElements(GL_TRIANGLES, VERTICES_IN_CUBE - (1 * VERTICES_IN_FACE), GL_UNSIGNED_INT, (void*)(1* VERTICES_IN_FACE * sizeof(GLuint)));
 
         // Floor
         glEnable(GL_STENCIL_TEST);  // Discard any reflection that is outside floor
@@ -412,9 +421,9 @@ int main() {
         glStencilMask(0xFF);    // Write to stencil buffer
         glDepthMask(GL_FALSE);
         glClear(GL_STENCIL_BUFFER_BIT); // Clear stencil buffer - can't do this until GL_STENCIL_TEST enabled
-		glDrawArrays(GL_TRIANGLES, 16, 6); // <- Draw the floor
+        glDrawElements(GL_TRIANGLES, VERTICES_IN_FACE, GL_UNSIGNED_INT, (void*)(VERTICES_IN_CUBE * sizeof(GLuint)));
 
-		// Cube reflection
+		// Cube reflection - don't bother drawing the face that's on the floor
 		model = glm::scale(
             glm::translate(model, glm::vec3(0, 0, -1)),
             glm::vec3(1, 1, -1)
@@ -423,8 +432,8 @@ int main() {
         glStencilFunc(GL_EQUAL, 1, 0xFF);   // Pass test if stencil is 1 (set by floor)
         glStencilMask(0x00);    // Don't write to stencil buffer
         glDepthMask(GL_TRUE);
-        glUniform3f(uniColor, 0.3f, 0.3f, 0.3f); // Darken the reflection
-        glDrawElements(GL_TRIANGLES, sizeof(elements), GL_UNSIGNED_INT, 0);
+        glUniform3f(uniColor, 0.7f, 0.7f, 0.7f); // Darken the reflection
+        glDrawElements(GL_TRIANGLES, VERTICES_IN_CUBE - (1 * VERTICES_IN_FACE), GL_UNSIGNED_INT, (void*)(1* VERTICES_IN_FACE * sizeof(GLuint)));
 
         // Reset for next draw
         glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
