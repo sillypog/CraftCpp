@@ -134,6 +134,44 @@ void checkShaderStatus(GLuint shader, string shaderName){
 	}
 }
 
+void checkFramebufferStatus(){
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    string not_complete = "Framebuffer is not complete: ";
+
+    switch(status){
+        case GL_FRAMEBUFFER_COMPLETE:
+            cout << "GL_FRAMEBUFFER_COMPLETE" << endl;
+            break;
+        case GL_FRAMEBUFFER_UNDEFINED:
+            cout << not_complete << "GL_FRAMEBUFFER_UNDEFINED" << endl;
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+            cout << not_complete << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT" << endl;
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+            cout << not_complete << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT" << endl;
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+            cout << not_complete << "GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER" << endl;
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+            cout << not_complete << "GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER" << endl;
+            break;
+        case GL_FRAMEBUFFER_UNSUPPORTED:
+            cout << not_complete << "GL_FRAMEBUFFER_UNSUPPORTED" << endl;
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+            cout << not_complete << "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE" << endl;
+            break;
+        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+            cout << not_complete << "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS" << endl;
+            break;
+        default:
+            cout << "Framebuffer status unknown: " << status << endl;
+    }
+}
+
 bool loadPngImage(char *name, int &outWidth, int &outHeight, bool &outHasAlpha, GLubyte **outData) {
     png_structp png_ptr;
     png_infop info_ptr;
