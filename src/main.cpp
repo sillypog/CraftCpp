@@ -82,6 +82,16 @@ float vertices[] = {
 //	-1.0f, -1.0f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f  // 16
 };
 
+float quadVertices[] = {
+    -0.5f,  0.5f, 0.0f, 1.0f,
+     0.5f,  0.5f, 1.0f, 1.0f,
+     0.5f, -0.5f, 1.0f, 0.0f,
+
+     0.5f, -0.5f, 1.0f, 0.0f,
+    -0.5f, -0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.0f, 1.0f
+};
+
 GLuint elements[] = {
     0,  1,  2,  2,  3,  0,
     4,  5,  6,  6,  7,  4,
@@ -93,9 +103,6 @@ GLuint elements[] = {
     // Floor
     16, 17, 18, 18, 19, 16
 };
-
-string vertexShaderFile;
-string fragmentShaderFile;
 
 GLubyte *kittenImage;
 
@@ -132,6 +139,40 @@ void checkShaderStatus(GLuint shader, string shaderName){
 		glGetShaderInfoLog(shader, 512, NULL, buffer);
 		cout << buffer;
 	}
+}
+
+GLuint buildShaderProgram(string vertexShaderFilename, string fragmentShaderFilename){
+    string vertexShaderFile;
+    string fragmentShaderFile;
+
+    loadShader(vertexShaderFilename, vertexShaderFile);
+    loadShader(fragmentShaderFilename, fragmentShaderFile);
+
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    const char *vertexShader_cStr = vertexShaderFile.c_str(); // Have to convert to c pointer array to pass to function
+    glShaderSource(vertexShader, 1, &vertexShader_cStr, NULL);
+    glCompileShader(vertexShader);
+
+    checkShaderStatus(vertexShader, "vertexShader");
+
+    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    const char *fragmentShader_cStr = fragmentShaderFile.c_str();
+    glShaderSource(fragmentShader, 1, &fragmentShader_cStr, NULL);
+    glCompileShader(fragmentShader);
+
+    checkShaderStatus(fragmentShader, "fragmentShader");
+
+    // Combine shaders
+    GLuint shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    //glBindFragDataLocation(shaderProgram, 0, "outColor"); // Not needed as 0 is default buffer
+    glLinkProgram(shaderProgram);   // Saves changes
+
+    glDeleteShader(fragmentShader);
+    glDeleteShader(vertexShader);
+
+    return shaderProgram;
 }
 
 void checkFramebufferStatus(){
@@ -289,6 +330,12 @@ bool loadPngImage(char *name, int &outWidth, int &outHeight, bool &outHasAlpha, 
     return true;
 }
 
+void defineVertexAttribute(GLuint shaderProgram, string attributeName, int attributeLength, int stride, int offset){
+    GLint attribute = glGetAttribLocation(shaderProgram, attributeName.c_str());
+    glVertexAttribPointer(attribute, attributeLength, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(offset * sizeof(float)));
+    glEnableVertexAttribArray(attribute);
+}
+
 int main() {
 	cout << "Hello World from C++!" << endl;
 
@@ -333,14 +380,18 @@ int main() {
     }
 
     // Prepare things for rendering
-    GLuint vao;
+    GLuint vao, vaoQuad;
 	glGenVertexArrays(1, &vao);
+    glGenVertexArrays(1, &vaoQuad);
 	glBindVertexArray(vao);
 
-    GLuint vbo;	// Vertex buffer object
+    GLuint vbo, vboQuad;	// Vertex buffer object
     glGenBuffers(1, &vbo);
+    glGenBuffers(1, &vboQuad);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    //glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
     // Textures
     GLuint textures[1];
@@ -354,48 +405,17 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, hasAlphaKitten ? GL_RGBA : GL_RGB, widthKitten, heightKitten, 0, hasAlphaKitten ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, kittenImage);
 
-    loadShader("shaders/vertex_shader.glsl", vertexShaderFile);
-    loadShader("shaders/fragment_shader.glsl", fragmentShaderFile);
-
-
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    const char *vertexShader_cStr = vertexShaderFile.c_str(); // Have to convert to c pointer array to pass to function
-    glShaderSource(vertexShader, 1, &vertexShader_cStr, NULL);
-    glCompileShader(vertexShader);
-
-    checkShaderStatus(vertexShader, "vertexShader");
-
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    const char *fragmentShader_cStr = fragmentShaderFile.c_str();
-    glShaderSource(fragmentShader, 1, &fragmentShader_cStr, NULL);
-    glCompileShader(fragmentShader);
-
-    checkShaderStatus(fragmentShader, "fragmentShader");
-
-    // Combine shaders
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    //glBindFragDataLocation(shaderProgram, 0, "outColor"); // Not needed as 0 is default buffer
-    glLinkProgram(shaderProgram);	// Saves changes
-    glUseProgram(shaderProgram);	// Only one can be used at a time
+    // Create shaders from files
+    GLuint shaderProgram = buildShaderProgram("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+    GLuint quadProgram = buildShaderProgram("shaders/quad_vertex_shader.glsl", "shaders/quad_fragment_shader.glsl");
+    glUseProgram(shaderProgram);    // Only one can be used at a time
 
     // Once vertex array object is created, define how our vertex data is passed in
-    GLint posAttrib = glGetAttribLocation(shaderProgram, "position");
-    glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), 0); // position has 2 members of type float
-    glEnableVertexAttribArray(posAttrib);
+    defineVertexAttribute(shaderProgram, "position", 3, 8, 0);
+    defineVertexAttribute(shaderProgram, "color",    3, 8, 3);
+    defineVertexAttribute(shaderProgram, "texcoord", 2, 8, 6);
 
-    GLint colAttrib = glGetAttribLocation(shaderProgram, "color");
-    glVertexAttribPointer(colAttrib, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3*sizeof(float)));
-    glEnableVertexAttribArray(colAttrib);
 
-    GLint texAttrib = glGetAttribLocation(shaderProgram, "texcoord");
-    glVertexAttribPointer(texAttrib, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(6*sizeof(float)));
-    glEnableVertexAttribArray(texAttrib);
-
-    // Set color through uniform to be passed to fragment shader
-    //GLint uniColor = glGetUniformLocation(shaderProgram, "triangleColor");
-    //glUniform3f(uniColor, 1.0f, 0.0f, 0.0f);
     glUniform1i(glGetUniformLocation(shaderProgram, "texKitten"), 0);
     GLint elapsed = glGetUniformLocation(shaderProgram, "elapsed");
     glUniform1f(elapsed, 0.0f);
@@ -492,8 +512,6 @@ int main() {
 
     // Cleanup
     glDeleteProgram(shaderProgram);
-	glDeleteShader(fragmentShader);
-	glDeleteShader(vertexShader);
 
 	glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
