@@ -383,15 +383,14 @@ int main() {
     GLuint vao, vaoQuad;
 	glGenVertexArrays(1, &vao);
     glGenVertexArrays(1, &vaoQuad);
-	glBindVertexArray(vao);
 
     GLuint vbo, vboQuad;	// Vertex buffer object
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &vboQuad);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    //glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
 
     // Textures
     GLuint textures[1];
@@ -411,9 +410,19 @@ int main() {
     glUseProgram(shaderProgram);    // Only one can be used at a time
 
     // Once vertex array object is created, define how our vertex data is passed in
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
     defineVertexAttribute(shaderProgram, "position", 3, 8, 0);
     defineVertexAttribute(shaderProgram, "color",    3, 8, 3);
     defineVertexAttribute(shaderProgram, "texcoord", 2, 8, 6);
+
+    glBindVertexArray(vaoQuad);
+    glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
+    defineVertexAttribute(quadProgram, "position", 2, 4, 0);
+    defineVertexAttribute(quadProgram, "texcoord", 2, 4, 2);
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 
     glUniform1i(glGetUniformLocation(shaderProgram, "texKitten"), 0);
@@ -445,14 +454,17 @@ int main() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
 
-    glEnable(GL_DEPTH_TEST);
-
     float startTime = glfwGetTime();
 
     constexpr int VERTICES_IN_FACE = 6;
     constexpr int VERTICES_IN_CUBE = VERTICES_IN_FACE * 6;
 
     while(!glfwWindowShouldClose(window)){
+        // Set up for drawing 3D elements
+        glBindVertexArray(vao);
+        glUseProgram(shaderProgram);
+        glEnable(GL_DEPTH_TEST);
+
     	// Keep running
     	// Clear the screen to white
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -496,6 +508,15 @@ int main() {
         // Reset for next draw
         glUniform3f(uniColor, 1.0f, 1.0f, 1.0f);
         glDisable(GL_STENCIL_TEST); // Turn off before next cube draw
+        glDisable(GL_DEPTH_TEST);
+
+
+        // Setup to draw 2D element
+        glBindVertexArray(vaoQuad);
+        glUseProgram(quadProgram);
+
+        // Draw 2D element
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
     	glfwSwapBuffers(window);
     	glfwPollEvents();
