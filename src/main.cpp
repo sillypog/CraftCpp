@@ -83,13 +83,13 @@ float vertices[] = {
 };
 
 float quadVertices[] = {
-    -0.9f,  0.9f, 0.0f, 1.0f,
-     0.9f,  0.9f, 1.0f, 1.0f,
-     0.9f, -0.9f, 1.0f, 0.0f,
+    -1.0f,  1.0f, 0.0f, 1.0f,
+     1.0f,  1.0f, 1.0f, 1.0f,
+     1.0f, -1.0f, 1.0f, 0.0f,
 
-     0.9f, -0.9f, 1.0f, 0.0f,
-    -0.9f, -0.9f,  0.0f, 0.0f,
-    -0.9f,  0.9f,  0.0f, 1.0f
+     1.0f, -1.0f, 1.0f, 0.0f,
+    -1.0f, -1.0f,  0.0f, 0.0f,
+    -1.0f,  1.0f,  0.0f, 1.0f
 };
 
 GLuint elements[] = {
@@ -496,6 +496,11 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, textures[0]);
 
     while(!glfwWindowShouldClose(window)){
+        // Set up for drawing to framebuffer
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, textures[0]);
+
         // Set up for drawing 3D elements
         glBindVertexArray(vao);
         glUseProgram(shaderProgram);
@@ -550,6 +555,11 @@ int main() {
         // Setup to draw 2D element
         glBindVertexArray(vaoQuad);
         glUseProgram(quadProgram);
+
+        // Setup to draw framebuffer to screen
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texColorBuffer);
 
         // Draw 2D element
         glDrawArrays(GL_TRIANGLES, 0, 6);
