@@ -83,13 +83,13 @@ float vertices[] = {
 };
 
 float quadVertices[] = {
-    -0.5f,  0.5f, 0.0f, 1.0f,
-     0.5f,  0.5f, 1.0f, 1.0f,
-     0.5f, -0.5f, 1.0f, 0.0f,
+    -0.9f,  0.9f, 0.0f, 1.0f,
+     0.9f,  0.9f, 1.0f, 1.0f,
+     0.9f, -0.9f, 1.0f, 0.0f,
 
-     0.5f, -0.5f, 1.0f, 0.0f,
-    -0.5f, -0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.0f, 1.0f
+     0.9f, -0.9f, 1.0f, 0.0f,
+    -0.9f, -0.9f,  0.0f, 0.0f,
+    -0.9f,  0.9f,  0.0f, 1.0f
 };
 
 GLuint elements[] = {
@@ -107,6 +107,9 @@ GLuint elements[] = {
 GLubyte *kittenImage;
 
 int frames = 0;
+
+constexpr int WINDOW_WIDTH = 640;
+constexpr int WINDOW_HEIGHT = 480;
 
 void error_callback(int error, const char* description){
 	cout << "There was an error: " << error << ": " << description << endl;
@@ -353,7 +356,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    GLFWwindow* window = glfwCreateWindow(640, 480, "My Title", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "My Title", NULL, NULL);
     if (!window){
     	glfwTerminate();
     	exit(EXIT_FAILURE);
@@ -459,6 +462,39 @@ int main() {
     constexpr int VERTICES_IN_FACE = 6;
     constexpr int VERTICES_IN_CUBE = VERTICES_IN_FACE * 6;
 
+    // Create a framebuffer
+    GLuint frameBuffer;
+    glGenFramebuffers(1, &frameBuffer);
+    checkFramebufferStatus();
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+    checkFramebufferStatus();
+
+    // // Create a texture to use with the framebuffer
+    GLuint texColorBuffer;
+    glGenTextures(1, &texColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WINDOW_WIDTH, WINDOW_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // // Attach the texture to the framebuffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+
+    // // Also need renderbuffer as we're using depth and stencil buffers for scene
+    GLuint rboDepthStencil;
+    glGenRenderbuffers(1, &rboDepthStencil);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepthStencil);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    // Attach the renderbuffer to the framebuffer
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rboDepthStencil);
+
+    checkFramebufferStatus();
+
+    // For now, keep drawing the normal textures directly to screen
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
+
     while(!glfwWindowShouldClose(window)){
         // Set up for drawing 3D elements
         glBindVertexArray(vao);
@@ -538,6 +574,9 @@ int main() {
     glDeleteBuffers(1, &ebo);
 
 	glDeleteVertexArrays(1, &vao);
+
+    glDeleteFramebuffers(1, &frameBuffer);
+    glDeleteRenderbuffers(1, &rboDepthStencil);
 
 	// Cleanup GLFW
     glfwDestroyWindow(window);
